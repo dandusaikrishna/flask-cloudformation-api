@@ -1,58 +1,104 @@
-# Flask CloudFormation API
+# AWS CloudFormation Subnet API with Flask
+
+## 👋 Introduction
 
 A lightweight Flask-based RESTful API service to interact with AWS CloudFormation.
 
-## Features
 
-- Retrieve CloudFormation templates from existing stacks
-- Modify subnet properties (e.g., convert public to private)
-- Create and monitor CloudFormation ChangeSets
+The objective of this project is to create a backend Flask API that interacts with **AWS CloudFormation** to:
+- ✅ Retrieve CloudFormation stack templates
+- ✅ Convert **public subnets to private**
+- ✅ Create and monitor **ChangeSets**
 
-## Technologies Used
+---
 
-- Python
-- Flask (REST API)
-- Boto3 (AWS SDK)
-- AWS CloudFormation
+## 🧰 Technologies Used
 
-## Setup Instructions
+- Python + Flask
+- Boto3 (AWS SDK for Python)
+- CloudFormation
+- Postman (for testing)
+- `.env` for AWS credentials
 
-1. Clone the repository:
-```bash
-git clone https://github.com/your-username/flask-cloudformation-api.git
-cd flask-cloudformation-api
+---
+
+## 🌐 Subnet & VPC Overview
+
+### 🔍 What is a Subnet?
+A **subnet** is a sub-division of a VPC (Virtual Private Cloud) in AWS, used to group and isolate resources.
+
+There are two types of subnets:
+- **Public Subnet** → Allows internet access (MapPublicIpOnLaunch: `true`)
+- **Private Subnet** → No direct internet access (MapPublicIpOnLaunch: `false`)
+
+This project involves converting public subnets to private in a CloudFormation template.
+
+---
+
+## 🛠️ Subnet Setup (via AWS Console)
+
+1. Create a VPC — CIDR block: `10.0.0.0/16`
+2. Create a Subnet — CIDR: `10.0.1.0/24`, enable public IPv4 assignment
+3. Import subnet into CloudFormation stack (name it like `MyImportedSubnet`)
+4. Use the stack name in the Flask APIs
+
+---
+
+## 🔄 VPC/Subnet Flow
+
+```
+VPC (10.0.0.0/16)
+│
+├── Subnet (10.0.1.0/24) ← Public (MapPublicIpOnLaunch: true)
+│
+├── Imported into CloudFormation Stack
+│
+├── Fetched & Modified by Flask API
+│
+└── ChangeSet Submitted to Update it to Private
 ```
 
-2. Create and activate a virtual environment:
+---
+
+## 🚀 Run the Project
+
 ```bash
+# Create a virtual environment
 python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-```
 
-3. Install dependencies:
-```bash
+# Activate it
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-4. Set AWS credentials via environment variables.
-
-5. Run the Flask app:
-```bash
+# Run the Flask app
 flask run
 ```
 
-## API Endpoints
+---
 
-| Endpoint                 | Method | Description                                                                                  |
-|--------------------------|--------|----------------------------------------------------------------------------------------------|
-| `/template`              | GET    | Retrieve the CloudFormation template (YAML converted to JSON) of a given stack              |
-| `/subnet/convert`        | PUT    | Convert public subnets to private in the given template and create a CloudFormation ChangeSet |
-| `/changeset/create`      | POST   | Create and monitor a ChangeSet for the given stack using the provided template              |
+## 🔐 .env File
 
+Set your credentials in a `.env` file (not pushed to GitHub):
 
+```
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_REGION=us-east-1
+```
+
+---
+
+## 📡 API Endpoints
+
+| Endpoint              | Method | Description                                                                 |
+|-----------------------|--------|-----------------------------------------------------------------------------|
+| `/template`           | GET    | Retrieve the CloudFormation template (YAML converted to JSON)              |
+| `/subnet/convert`     | PUT    | Convert public subnets to private and create a CloudFormation ChangeSet    |
+| `/changeset/create`   | POST   | Create and monitor a ChangeSet for a given stack and template               |
+
+---
 
 ### 1. GET /template
 Query: `stack_name`
@@ -127,12 +173,19 @@ Create and track a ChangeSet.
 
 <img width="1366" height="768" alt="Screenshot 2025-07-13 113827" src="https://github.com/user-attachments/assets/d0e5ba4e-0fe5-42ee-88db-044018db6c25" />
 
+## 📁 Screenshots
 
-## Permissions Required
-- cloudformation:GetTemplate
-- cloudformation:CreateChangeSet
-- cloudformation:DescribeChangeSet
-- cloudformation:UpdateStack
-- ec2:DescribeSubnets
+📸 Screenshots are included in this repo to demonstrate successful:
+- Subnet setup in AWS Console
+- CloudFormation stack import
+- ChangeSet creation via API
 
-MIT License
+---
+
+## ✅ Conclusion
+
+Thanks for reviewing this assignment! Feel free to reach out if you have any questions or feedback.
+
+**Author:** Sai Krishna Dandu  
+**Email:** saikrishnadandu9@gmail.com  
+**Phone:** 9381752077
