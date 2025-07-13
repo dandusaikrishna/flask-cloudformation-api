@@ -12,6 +12,11 @@ The objective of this project is to create a backend Flask API that interacts wi
 
 ---
 
+#Demo 🛠
+
+https://drive.google.com/file/d/1OZNzTxUk-Z1NlNhfXCLmaCxlz5uuHSKV/view?usp=sharing
+
+
 ## 🧰 Technologies Used
 
 - Python + Flask
@@ -182,9 +187,6 @@ Create and track a ChangeSet.
 
 ---
 
-#Demo 🛠
-
-https://drive.google.com/file/d/1OZNzTxUk-Z1NlNhfXCLmaCxlz5uuHSKV/view?usp=sharing
 
 ## ✅ Conclusion
 
