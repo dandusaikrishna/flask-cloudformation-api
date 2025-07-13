@@ -1,0 +1,94 @@
+{
+	"info": {
+		"_postman_id": "6fd8b15f-d493-4983-9aeb-29542a594aba",
+		"name": "CloudFormation Subnet API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46708808",
+		"_collection_link": "https://saikrishna-5492098.postman.co/workspace/Sai-Krishna's-Workspace~8553c606-fc25-4e7c-81de-15594058d658/collection/46708808-6fd8b15f-d493-4983-9aeb-29542a594aba?action=share&source=collection_link&creator=46708808"
+	},
+	"item": [
+		{
+			"name": "Get CloudFormation Template",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/template?stack_name=MySubnetStack",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"template"
+					],
+					"query": [
+						{
+							"key": "stack_name",
+							"value": "MySubnetStack"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Convert Subnet to Private",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"template\": {\n    \"Resources\": {\n      \"MyImportedSubnet\": {\n        \"Type\": \"AWS::EC2::Subnet\",\n        \"Properties\": {\n          \"VpcId\": \"vpc-0c4274a584fb3fabd\",\n          \"CidrBlock\": \"10.0.1.0/24\",\n          \"MapPublicIpOnLaunch\": true\n        }\n      }\n    }\n  }\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/subnet/convert",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"subnet",
+						"convert"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create ChangeSet",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"stack_name\": \"MySubnetStack\",\n  \"template\": {\n    \"Resources\": {\n      \"MyImportedSubnet\": {\n        \"Type\": \"AWS::EC2::Subnet\",\n        \"Properties\": {\n          \"VpcId\": \"vpc-0c4274a584fb3fabd\",\n          \"CidrBlock\": \"10.0.1.0/24\",\n          \"MapPublicIpOnLaunch\": false\n        }\n      }\n    }\n  }\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/changeset/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"changeset",
+						"create"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
