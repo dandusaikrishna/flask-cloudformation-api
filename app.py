@@ -7,6 +7,8 @@ from botocore.exceptions import ClientError
 import os
 from dotenv import load_dotenv
 
+load_dotenv()  # Load environment variables from .env file
+
 app = Flask(__name__)
 
 # credentials from .env
@@ -50,14 +52,45 @@ def convert_subnet():
     # Convert public subnets to private subnets in the template
     try:
         resources = template.get('Resources', {})
+
+        # Map route table logical IDs to their routes
+        route_tables = {}
+        for res_name, res in resources.items():
+            if res.get('Type') == 'AWS::EC2::RouteTable':
+                route_tables[res_name] = res.get('Properties', {}).get('Routes', [])
+
+        # Map subnet logical IDs to associated route table logical IDs
+        subnet_route_table_assoc = {}
+        for res_name, res in resources.items():
+            if res.get('Type') == 'AWS::EC2::SubnetRouteTableAssociation':
+                subnet_id = res.get('Properties', {}).get('SubnetId')
+                route_table_id = res.get('Properties', {}).get('RouteTableId')
+                if isinstance(subnet_id, str) and isinstance(route_table_id, str):
+                    subnet_route_table_assoc[subnet_id] = route_table_id
+                elif isinstance(subnet_id, dict) and 'Ref' in subnet_id and isinstance(route_table_id, dict) and 'Ref' in route_table_id:
+                    subnet_route_table_assoc[subnet_id['Ref']] = route_table_id['Ref']
+
+        # For each subnet, determine if it is public or private based on route table routes
         for res_name, res in resources.items():
             if res.get('Type') == 'AWS::EC2::Subnet':
                 properties = res.get('Properties', {})
-                # Check if MapPublicIpOnLaunch is True, convert to False
-                if properties.get('MapPublicIpOnLaunch') is True:
+                # Determine associated route table
+                route_table_id = subnet_route_table_assoc.get(res_name)
+                is_public = False
+                if route_table_id and route_table_id in route_tables:
+                    routes = route_tables[route_table_id]
+                    for route in routes:
+                        destination_cidr = route.get('DestinationCidrBlock') or route.get('DestinationIpv6CidrBlock')
+                        gateway_id = route.get('GatewayId')
+                        if destination_cidr in ['0.0.0.0/0', '::/0'] and gateway_id and gateway_id.startswith('igw-'):
+                            is_public = True
+                            break
+                # Set MapPublicIpOnLaunch accordingly
+                if is_public:
+                    properties['MapPublicIpOnLaunch'] = True
+                else:
                     properties['MapPublicIpOnLaunch'] = False
 
-            
         # Create ChangeSet with the updated template
         change_set_name = f"changeset-{int(time.time())}"
         response = cloudformation.create_change_set(
